@@ -8,9 +8,10 @@
 
 如果你有任何想法或建议，请随时提出 Issues 或加入 QQ 群：647038879
 
-##详见飞书文档教程：
 
-👉 [《小智接入 MCP 教程与工具》](https://kcn80f4hacgs.feishu.cn/wiki/RTaHwEOp8iu6ACkXbrNcJ4GMnVg)
+> [!TIP]
+>
+> 您可以点击链接查看飞书 [小智接入 MCP 教程与工具 文档](https://kcn80f4hacgs.feishu.cn/wiki/RTaHwEOp8iu6ACkXbrNcJ4GMnVg) 了解更多。
 
 
 #### 使用环境
