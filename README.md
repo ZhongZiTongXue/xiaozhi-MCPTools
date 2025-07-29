@@ -8,6 +8,16 @@
 
 如果你有任何想法或建议，请随时提出 Issues 或加入 QQ 群：647038879
 
+##详见飞书文档教程：
+
+👉 [《小智接入 MCP 教程与工具》](https://kcn80f4hacgs.feishu.cn/wiki/RTaHwEOp8iu6ACkXbrNcJ4GMnVg)
+
+
+#### 使用环境
+
+- 推荐Windows10及以上 操作系统
+
+
 ## 演示视频
 
 👉 [人类：给 AI 装摄像头 vs AI：当场发现主人三天没洗头【bilibili】](https://www.bilibili.com/video/BV1bpjgzKEhd/)
@@ -55,12 +65,3 @@
 - 16.获取回声洞
 
 
-
-详见飞书文档教程：
-
-👉 [《小智接入 MCP 教程与工具》](https://kcn80f4hacgs.feishu.cn/wiki/RTaHwEOp8iu6ACkXbrNcJ4GMnVg)
-
-
-### 使用环境
-
-- 推荐Windows10及以上 操作系统
