@@ -11,7 +11,7 @@
 
 > [!TIP]
 >
-> 您可以点击链接查看飞书 [小智接入 MCP 教程与工具 文档](https://kcn80f4hacgs.feishu.cn/wiki/RTaHwEOp8iu6ACkXbrNcJ4GMnVg) 了解更多。
+> #### 您可以点击链接查看飞书 [小智接入 MCP 教程与工具 文档](https://kcn80f4hacgs.feishu.cn/wiki/RTaHwEOp8iu6ACkXbrNcJ4GMnVg) 了解更多。
 
 
 #### 使用环境
@@ -72,9 +72,10 @@
 
 ### ALAPI 工具
 
-> [!TIP]
->
-> 您需要先 [注册此网站](https://www.alapi.cn/) 获取请求Token
+> [!IMPORTANT]
+>#### **您需要先 [注册此网站](https://www.alapi.cn/) 获取请求Token**
+> 
+> ***详细启用教程请等待完善***
 
  - 1.获取心灵毒鸡汤
  - 2.获取早报
