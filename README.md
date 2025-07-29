@@ -20,9 +20,9 @@
 
 ## 演示视频
 
-👉 [人类：给 AI 装摄像头 vs AI：当场发现主人三天没洗头【bilibili】](https://www.bilibili.com/video/BV1bpjgzKEhd/)
+👉 [软件安装教程（必看）【抖音】](https://v.douyin.com/slJLweHvgs8/)
 
-👉 [手工打造你的 AI 女友，新手入门教程【bilibili】](https://www.bilibili.com/video/BV1XnmFYLEJN/)
+👉 [小智Ai 操控主人电脑【抖音】](https://v.douyin.com/QJAQ4tRSSt4/)
 
 
 ### 已实现控制电脑功能
