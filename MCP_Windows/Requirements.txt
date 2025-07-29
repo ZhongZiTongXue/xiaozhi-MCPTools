@@ -1,0 +1,12 @@
+python-dotenv>=1.0.0
+websockets>=11.0.3
+mcp>=1.8.1
+pydantic>=2.11.4
+fastmcp
+pyautogui
+pyperclip
+paho-mqtt
+requests
+beautifulsoup4
+psutil
+pycaw
