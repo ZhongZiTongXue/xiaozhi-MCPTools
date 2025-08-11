@@ -13,6 +13,8 @@ import os
 import paho.mqtt.client as mqtt
 import threading
 
+请求私钥 = "ac9a9f2b686bb4257867806c1dcfaf67"
+
 # -------------------------------------------------------------------------------------------------
 # 配置编码和日志
 # 确保输出和日志使用正确的编码，避免中文字符显示问题
@@ -38,6 +40,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 programs_file_path = os.path.join(current_dir, "预设", "程序预设.txt")
 commands_file_path = os.path.join(current_dir, "预设", "命令预设.txt")
 
+# 构建用户巴法私钥文件的完整路径
+用户巴法私钥_file_path = os.path.join(current_dir, "数据", "接入API", "用户巴法私钥.txt")
 # -------------------------------------------------------------------------------------------------
 
 # 读取预设文件
@@ -90,22 +94,26 @@ def get_default_content(file_path: str) -> str:
 preset_programs = load_presets(programs_file_path)
 preset_commands = load_presets(commands_file_path)
 
-# 读取token
-def load_token(file_path: str) -> str:
+# 读取用户巴法私钥
+def load_用户巴法私钥(file_path: str) -> str:
     """
-    从指定的文本文档中加载token。
+    从指定的文本文档中加载用户巴法私钥。
     参数： file_path: 文本文档的路径
     """
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
-            token = file.read().strip()
-            return token
+            用户巴法私钥 = file.read().strip()
+            return 用户巴法私钥
     except FileNotFoundError:
-        logger.error(f"token文件 {file_path} 未找到")
+        logger.error(f"用户巴法私钥文件 {file_path} 未找到")
         return ""
     except Exception as e:
-        logger.error(f"读取token文件 {file_path} 时出错: {str(e)}")
+        logger.error(f"读取用户巴法私钥文件 {file_path} 时出错: {str(e)}")
         return ""
+
+# 加载用户巴法私钥
+用户巴法私钥 = load_用户巴法私钥(用户巴法私钥_file_path)
+
 
 # -------------------------------------------------------------------------------------------------
 
@@ -244,9 +252,9 @@ import time
 
 # 定义工具函数：自动粘贴内容到当前光标位置
 @mcp.tool()
-def 填入一段内容(content: str) -> dict:
+def 填入写入一段内容(content: str) -> dict:
     """
-    将指定内容复制到剪贴板，然后模拟 Ctrl+V 操作粘贴到当前光标所在位置。不进行回车发送
+    填入写入将指定内容复制到剪贴板，然后模拟 Ctrl+V 操作粘贴到当前光标所在位置。不进行回车发送
     参数：
     content: 要粘贴的内容，例如 "这是有小智填入的一段内容！"
     """
@@ -671,8 +679,40 @@ if 允许使用微信发消息工具:
 
 
 
+@mcp.tool()
+def 设置主人电脑系统深浅色主题(params: dict) -> dict:
+    """
+    设置 Windows 系统的浅色/深色主题
+    调用方法：设置主人电脑系统深浅色主题({"深色": false})  # true = 深色，false = 浅色
+    """
+    import winreg
+    try:
+        dark = bool(params.get("深色", True))
+        key_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+        value = 0 if dark else 1
+
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
+            # 两个关键值都改！
+            winreg.SetValueEx(key, "AppsUseLightTheme",    0, winreg.REG_DWORD, value)
+            winreg.SetValueEx(key, "SystemUsesLightTheme", 0, winreg.REG_DWORD, value)
+            winreg.SetValueEx(key, "ColorPrevalence",      0, winreg.REG_DWORD, 1)
+
+        logger.info(f"\n\n已切换为 {'深色' if dark else '浅色'} 主题\n")
+        return {"是否成功": True, "结果": f"已切换为 {'深色' if dark else '浅色'} 主题"}
+    except Exception as e:
+        logger.error(f"切换主题失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+
+# -------------------------------------------------------------------------------------------------
+
+
+
 #以下为Open_API工具函数
 
+
+
+# -------------------------------------------------------------------------------------------------
 
 
 import requests
@@ -887,6 +927,139 @@ def 获取土味情话() -> dict:
 # -------------------------------------------------------------------------------------------------
 
 
+# 定义工具函数：获取今日电影票房 Top10
+@mcp.tool()
+def 获取今日电影票房() -> dict:
+    """
+    从网页公共开放的API获取今日电影票房榜前10名。
+    """
+    try:
+        # 发送请求获取电影票房榜
+        response = requests.get("https://api.52vmy.cn/api/wl/top/movie?type=text")
+        response.raise_for_status()  # 确保请求成功
+        票房内容 = response.text.strip()  # 获取返回的票房榜内容
+
+        logger.info(f"\n\n获取到的今日电影票房榜: \n{票房内容}\n")
+        return {"是否成功": True, "结果": 票房内容}
+    except Exception as e:
+        logger.error(f"获取今日电影票房榜失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+      
+
+# 定义工具函数：获取一条脑筋急转弯
+@mcp.tool()
+def 获取脑筋急转弯() -> dict:
+    """
+    从网页公共开放的API随机获取一条脑筋急转弯（含问题与答案）。
+    你可以先向用户提出问题，让用户猜答案，再在回答完的时候提示用户正确答案。
+    不要直接把问题和答案同时直接告诉用户！
+    """
+    try:
+        response = requests.get("https://api.52vmy.cn/api/wl/s/jzw")
+        response.raise_for_status()
+        data = response.json()
+
+        logger.info(f"\n\n获取到的脑筋急转弯: {data}\n")
+        return {
+            "是否成功": True,
+            "问题": data.get("data", {}).get("question", ""),
+            "答案": data.get("data", {}).get("answer", "")
+        }
+    except Exception as e:
+        logger.error(f"获取脑筋急转弯失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+  
+
+# 定义工具函数：每日早报
+@mcp.tool()
+def 每日早报() -> dict:
+    """
+    从网页公共开放的API获取「每日60秒早报」。
+    """
+    try:
+        response = requests.get("https://api.52vmy.cn/api/wl/60s/new")
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("code") != 200:
+            raise ValueError(f"接口返回非 200：{data}")
+
+        news_list = data.get("data", [])
+        logger.info(f"\n\n今日早报：\n" + "\n".join(news_list) + "\n")
+        return {
+            "是否成功": True,
+            "早报列表": news_list
+        }
+    except Exception as e:
+        logger.error(f"获取「每日早报」失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+
+# 定义工具函数：今天吃什么
+@mcp.tool()
+def 今天吃什么() -> dict:
+    """
+    从网页公共开放的API随机获取一条「今天吃什么」推荐。
+    """
+    try:
+        response = requests.get("https://api.52vmy.cn/api/wl/s/eat")
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("code") != 200:
+            raise ValueError(f"接口返回非 200：{data}")
+
+        food = data.get("data", "")
+        logger.info(f"\n\n今天吃：{food}\n")
+        return {
+            "是否成功": True,
+            "推荐菜品": food
+        }
+    except Exception as e:
+        logger.error(f"获取「今天吃什么」失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+  
+
+# 定义工具函数：搜索百度百科
+@mcp.tool()
+def 搜索百度百科(query: str) -> dict:
+    """
+    根据关键词搜索百度百科，返回简介及百度百科网页链接。请将简介信息告诉用户！
+    可以询问用户是否需要跳转打开这个查询到的网页，如果用户让你打开这个网页，那么必须调用工具："在电脑上打开URL网址"，传递百度百科网址打开
+    参数:
+        query (str): 搜索词，例如 "QQ"、"Python" 之类。
+    """
+    try:
+        # 构造请求 URL（对搜索词做 URL 编码）
+        url = f"https://api.52vmy.cn/api/query/baike?msg={requests.utils.quote(query)}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        if data.get("code") != 200:
+            raise ValueError(f"接口返回非 200：{data}")
+
+        info = data.get("data", {})
+        logger.info(f"\n\n百度百科「{query}」搜索结果: \n{info.get('text')}\n")
+        return {
+            "是否成功": True,
+            "搜索到的内容：": info.get("text", ""),
+            "百度百科网址：": info.get("url", "")
+        }
+    except Exception as e:
+        logger.error(f"搜索百度百科失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+ 
+
 @mcp.tool()        
 def 获取深证成指() -> dict:
     """
@@ -1016,6 +1189,45 @@ def 获取历史上的今天() -> dict:
         return {"是否成功": False, "错误": str(e)}
 # -------------------------------------------------------------------------------------------------
 
+
+# 定义工具函数：获取万年历
+@mcp.tool()
+def 获取万年历() -> dict:
+    """
+    从网页获取当日的万年历信息。
+    """
+    try:
+        # 发送请求获取万年历信息
+        response = requests.get("https://api.52vmy.cn/api/wl/wnl")
+        response.raise_for_status()  # 确保请求成功
+        万年历数据 = response.json()  # 获取返回的JSON数据
+
+        # 提取并格式化所需字段
+        农历日期 = f"{万年历数据['lunarYear']}年{万年历数据['lMonth']}{万年历数据['lDate']}"
+        干支 = f"{万年历数据['gzYear']}年 {万年历数据['gzMonth']}月 {万年历数据['gzDate']}日"
+        生肖 = 万年历数据['animal']
+        宜 = 万年历数据['suit']
+        忌 = 万年历数据['avoid']
+
+        格式化万年历 = (
+            f"【公历】{万年历数据['year']}年{万年历数据['month']}月{万年历数据['day']}日\n"
+            f"【农历】{农历日期}\n"
+            f"【干支】{干支}\n"
+            f"【生肖】{生肖}\n"
+            f"【宜】{宜}\n"
+            f"【忌】{忌}"
+        )
+
+        logger.info(f"\n\n获取到的万年历信息: \n\n{格式化万年历}\n")
+        return {"是否成功": True, "结果": 格式化万年历}
+    except Exception as e:
+        logger.error(f"获取万年历信息失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+    
+# -------------------------------------------------------------------------------------------------
+ 
+
+
 import json
 # 定义工具函数：12306查询车票
 @mcp.tool()
@@ -1098,7 +1310,6 @@ if os.path.exists(是作者工作环境判断文件路径):
 
             HOST      = "bemfa.com"
             PORT      = 9501
-            CLIENT_ID = "ac9a9f2b686bb4257867806c1dcfaf67"
             USERNAME  = "UserName"
             PASSWORD  = "Passwd"
             TOPIC     = "WSD004"
@@ -1133,7 +1344,7 @@ if os.path.exists(是作者工作环境判断文件路径):
                     # 按你的格式记录日志
                     logger.error("\n\n获取温湿度失败:\n\n" + str(e))
 
-            client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
+            client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=请求私钥)
             client.username_pw_set(USERNAME, PASSWORD)
             client.on_connect = on_connect
             client.on_message = on_message
@@ -1150,34 +1361,6 @@ if os.path.exists(是作者工作环境判断文件路径):
                 timer.cancel()
 
             return result
-
-
-# -------------------------------------------------------------------------------------------------
-
-
-@mcp.tool()
-def 设置主人电脑系统深浅色主题(params: dict) -> dict:
-    """
-    设置 Windows 系统的浅色/深色主题
-    调用方法：设置主人电脑系统深浅色主题({"深色": false})  # true = 深色，false = 浅色
-    """
-    import winreg
-    try:
-        dark = bool(params.get("深色", True))
-        key_path = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-        value = 0 if dark else 1
-
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path, 0, winreg.KEY_SET_VALUE) as key:
-            # 两个关键值都改！
-            winreg.SetValueEx(key, "AppsUseLightTheme",    0, winreg.REG_DWORD, value)
-            winreg.SetValueEx(key, "SystemUsesLightTheme", 0, winreg.REG_DWORD, value)
-            winreg.SetValueEx(key, "ColorPrevalence",      0, winreg.REG_DWORD, 1)
-
-        logger.info(f"\n\n已切换为 {'深色' if dark else '浅色'} 主题\n")
-        return {"是否成功": True, "结果": f"已切换为 {'深色' if dark else '浅色'} 主题"}
-    except Exception as e:
-        logger.error(f"切换主题失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
 
 
 # -------------------------------------------------------------------------------------------------
@@ -1427,7 +1610,6 @@ def 获取回声洞() -> dict:
 
     HOST      = "bemfa.com"
     PORT      = 9501
-    CLIENT_ID = "ac9a9f2b686bb4257867806c1dcfaf67"
     USERNAME  = "UserName"
     PASSWORD  = "Passwd"
     TOPIC     = "HSD004"
@@ -1462,7 +1644,7 @@ def 获取回声洞() -> dict:
             # 按你的格式记录日志
             logger.error("\n\n获取回声洞内容失败:\n\n" + str(e))
 
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=CLIENT_ID)
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=请求私钥)
     client.username_pw_set(USERNAME, PASSWORD)
     client.on_connect = on_connect
     client.on_message = on_message
@@ -1483,6 +1665,48 @@ def 获取回声洞() -> dict:
 
 # -------------------------------------------------------------------------------------------------
 
+
+@mcp.tool()
+def 推送巴法消息(要推送的主题: str, 要推送的消息: str) -> dict:
+    """
+    推送巴法消息
+    参数：
+    要推送的主题: 要推送的主题名称
+    要推送的消息：要推送主题的内容
+    要推送的内容和主题由用户提供！
+
+    """
+    HOST      = "bemfa.com"
+    PORT      = 9501
+    USERNAME  = "UserName"
+    PASSWORD  = "Passwd"
+
+    # 创建MQTT客户端
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=用户巴法私钥)
+    client.username_pw_set(USERNAME, PASSWORD)
+
+    try:
+        # 连接并发送消息
+        client.connect(HOST, PORT, 60)
+        client.publish(要推送的主题, 要推送的消息)
+        # 立即返回成功状态
+
+        logger.info(f"\n\n已向主题：{要推送的主题}\n推送了内容：{要推送的消息}\n")
+        return {"是否成功": True, "结果": f"已尝试已向主题：{要推送的主题}]\n推送了内容：{要推送的消息}"}
+    except Exception as e:
+        # 连接或发送失败时返回错误信息
+        
+        logger.error(f"\n\n错误！推送失败！: {str(e)}\n")
+        return {"是否成功": False, "结果": f"推送失败: {str(e)}"}
+    finally:
+        # 确保断开连接
+        try:
+            client.disconnect()
+        except:
+            pass
+
+
+# -------------------------------------------------------------------------------------------------
 
 
 #添加自己更多的API工具 或者MCP工具
@@ -1530,7 +1754,14 @@ API功能 = [
     "13.查询公司基本面",
     "14.获取历史上的今天",
     "15.查询高铁票",
-    "16.获取回声洞"
+    "16.获取回声洞",
+    "17.获取脑筋急转弯",
+    "18.每日早报",
+    "19.今天吃什么",
+    "20.搜索百度百科",
+    "21.获取今日电影票房",
+    "22.获取万年历",
+    "23.推送巴法消息"
 ]
 
 # 动态插入工具功能到第一部分
@@ -1541,7 +1772,7 @@ if 允许使用微信发消息工具:
 # 动态插入工具功能
 if 是作者工作环境:
 
-    API功能.append("17.获取房间环境温湿度！")
+    API功能.append("24.获取房间环境温湿度！")
 
     # 控制洛雪音乐工具列表（第3部分）
 
@@ -1575,7 +1806,7 @@ else:
 # 主程序入口
 if __name__ == "__main__":
     logger.info("\n\n\tMCP_Windows服务已启动！等待调用！\n\n当前支持的控制电脑工具：\n" + "\n".join(功能内容) + "\n\n快尝试小智的能力吧！\n")
-    logger.info("\n\n\t\b版本：v38.25.61 (2025-07-29 更新)\n\t\tBy[粽子同学]\n\n")
+    logger.info("\n\n\t\b版本：v45.36.51 (2025-08-04 更新)\n\t\tBy[粽子同学]\n\n")
     mcp.run(transport="stdio")
 # -------------------------------------------------------------------------------------------------
 

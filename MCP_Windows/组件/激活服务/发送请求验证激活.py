@@ -17,6 +17,7 @@ password = "your_password"  # 替换为你的密码
 
 血继限界权所有=r"C:\xiaozhi\MCP\MCP_Windows\血继限界版权所有.INI"
 XYZ电子实验室版权所有=r"C:\xiaozhi\MCP\MCP_Windows\XYZ电子实验室版权所有.INI"
+Teng版权所有=r"C:\xiaozhi\MCP\MCP_Windows\Teng版权所有.INI"
 
 if os.path.exists(血继限界权所有):
     
@@ -25,6 +26,10 @@ if os.path.exists(血继限界权所有):
 if os.path.exists(XYZ电子实验室版权所有):
     
     topic = "MCPToolsAK3"  # 定义主题
+
+if os.path.exists(Teng版权所有):
+    
+    topic = "MCPToolsAK2"  # 定义主题
 
 else:
 
