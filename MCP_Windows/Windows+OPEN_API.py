@@ -725,7 +725,7 @@ def 获取心灵毒鸡汤() -> dict:
     """
     try:
         # 发送请求获取毒鸡汤
-        response = requests.get("https://jkapi.com/api/dujitang")
+        response = requests.get("https://api.52vmy.cn/api/wl/yan/du")
         response.raise_for_status()  # 确保请求成功
         毒鸡汤 = response.text.strip()  # 获取返回的毒鸡汤
 
@@ -737,196 +737,375 @@ def 获取心灵毒鸡汤() -> dict:
 
 # -------------------------------------------------------------------------------------------------
 
-
-# 定义工具函数：获取晚安问候语
-@mcp.tool()
-def 获取晚安问候语() -> dict:
-    """
-    从网页公共开放的API晚安问候语
-    """
-    try:
-        # 发送请求获取晚安问候语
-        response = requests.get("https://jkapi.com/api/wanan")
-        response.raise_for_status()  # 确保请求成功
-        晚安问候语 = response.text.strip()  # 获取返回的晚安问候语
-
-        logger.info(f"\n\n获取到的晚安问候语: {晚安问候语}\n")
-        return {"是否成功": True, "结果": 晚安问候语}
-    except Exception as e:
-        logger.error(f"获取晚安问候语失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-
-# -------------------------------------------------------------------------------------------------
-
-
-
-# 定义工具函数：获取早安问候语
-@mcp.tool()
-def 获取早安问候语() -> dict:
-    """
-    从网页公共开放的API获取早安问候语。
-    """
-    try:
-        # 发送请求获取早安问候语
-        response = requests.get("https://jkapi.com/api/zaoan")
-        response.raise_for_status()  # 确保请求成功
-        早安问候语 = response.text.strip()  # 获取返回的早安问候语
-
-        logger.info(f"\n\n获取到的早安问候语: {早安问候语}\n")
-        return {"是否成功": True, "结果": 早安问候语}
-    except Exception as e:
-        logger.error(f"获取早安问候语失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-
-# -------------------------------------------------------------------------------------------------
-
-
 # 定义工具函数：获取抖音热点
 @mcp.tool()
-def 获取抖音热点() -> dict:
+def 查询抖音热榜(limit: int = 20) -> dict:
     """
-    从网页公共开放的API获取抖音热搜榜。
-    """
-    try:
-        # 发送请求获取抖音热点
-        response = requests.get("https://jkapi.com/api/dy_hot")
-        response.raise_for_status()  # 确保请求成功
-        热点内容 = response.text.strip()  # 获取返回的热点内容
+    获取抖音实时热榜（精简版）
 
-        logger.info(f"\n\n获取到的抖音热点: {热点内容}\n")
-        return {"是否成功": True, "结果": 热点内容}
+    参数:
+        limit: 返回前 N 条，默认 20，最大 50
+    """
+    url = "https://v2.xxapi.cn/api/douyinhot"
+
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if data.get("code") != 200:
+            msg = data.get("msg", "未知错误")
+            logger.error(f"抖音热榜接口异常：{msg}")
+            return {"是否成功": False, "错误": msg}
+
+        hot_list = data.get("data", [])
+        if not hot_list:
+            return {"是否成功": False, "错误": "热榜数据为空"}
+
+        # 限制条数
+        limit = max(1, min(limit, 50))
+        hot_list = hot_list[:limit]
+
+        lines = []
+        for idx, item in enumerate(hot_list, 1):
+            title = item.get("word", "无标题")
+            hot_val = item.get("hot_value", 0)
+            lines.append(f"{idx:>2}. {title}  ({hot_val:,})")
+
+        formatted = "\n【抖音实时热榜】\n" + "\n".join(lines)
+        logger.info(f"\n{formatted}\n")
+        return {"是否成功": True, "result": formatted}
+
+    except requests.RequestException as e:
+        logger.error(f"网络请求失败：{e}")
+        return {"是否成功": False, "错误": f"网络请求失败：{e}"}
     except Exception as e:
-        logger.error(f"获取抖音热点失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
+        logger.error(f"解析失败：{e}")
+        return {"是否成功": False, "错误": f"解析失败：{e}"}
     
 # -------------------------------------------------------------------------------------------------
 
-# 定义工具函数：获取哔哩哔哩热点
-@mcp.tool()
-def 获取哔哩哔哩热搜() -> dict:
-    """
-    从网页公共开放的API获取哔哩哔哩热搜榜。
-    """
-    try:
-        # 发送请求获取哔哩哔哩热点
-        response = requests.get("https://jkapi.com/api/bili_hot")
-        response.raise_for_status()  # 确保请求成功
-        热点内容 = response.text.strip()  # 获取返回的热点内容
-
-        logger.info(f"\n\n获取到的哔哩哔哩热点: {热点内容}\n")
-        return {"是否成功": True, "结果": 热点内容}
-    except Exception as e:
-        logger.error(f"获取哔哩哔哩热点失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-
-# -------------------------------------------------------------------------------------------------
-
-# 定义工具函数：获取微博热点
-@mcp.tool()
-def 获取微博热搜() -> dict:
-    """
-    从网页公共开放的API获取微博热搜榜。
-    """
-    try:
-        # 发送请求获取微博热点
-        response = requests.get("https://jkapi.com/api/wb_hot")
-        response.raise_for_status()  # 确保请求成功
-        热点内容 = response.text.strip()  # 获取返回的热点内容
-
-        logger.info(f"\n\n获取到的微博热点: {热点内容}\n")
-        return {"是否成功": True, "结果": 热点内容}
-    except Exception as e:
-        logger.error(f"获取微博热点失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-
-# -------------------------------------------------------------------------------------------------
-
-
-# 定义工具函数：少数派热点
-@mcp.tool()
-def 少数派热点() -> dict:
-    """
-    从网页公共开放的API获取少数派热点
-    """
-    try:
-        # 发送请求少数派热点
-        response = requests.get("https://jkapi.com/api/ssp_hot")
-        response.raise_for_status()  # 确保请求成功
-        热点内容 = response.text.strip()  # 获取返回的热点内容
-
-        logger.info(f"\n\n获取到的少数派热点: {热点内容}\n")
-        return {"是否成功": True, "结果": 热点内容}
-    except Exception as e:
-        logger.error(f"获取少数派热点失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-    
-# -------------------------------------------------------------------------------------------------
 
 
 # 定义工具函数：获取随机一言
 @mcp.tool()
 def 获取随机一言() -> dict:
     """
-    从网页公共开放的API获取随机一言。
+    从网页公共开放的API获取随机一言（Hitokoto）。
     """
     try:
-        # 发送请求获取随机一言
-        response = requests.get("https://jkapi.com/api/one_yan")
+        # 发送 GET 请求
+        response = requests.get("https://api.52vmy.cn/api/wl/yan/yiyan")
         response.raise_for_status()  # 确保请求成功
-        随机一言 = response.text.strip()  # 获取返回的随机一言
+        # 解析 JSON 响应
+        data = response.json()
+        # 提取一言内容
+        hitokoto = data.get("data", {}).get("hitokoto", "").strip()
 
-        logger.info(f"\n\n获取到的随机一言: {随机一言}\n")
-        return {"是否成功": True, "结果": 随机一言}
+        logger.info(f"\n\n获取到的随机一言: {hitokoto}\n")
+        return {"是否成功": True, "结果": hitokoto}
     except Exception as e:
         logger.error(f"获取随机一言失败: {str(e)}")
         return {"是否成功": False, "错误": str(e)}
 
+
 # -------------------------------------------------------------------------------------------------
 
-
-# 定义工具函数：获取骚话文案
+# 定义工具函数：获取舔狗日记
 @mcp.tool()
-def 获取骚话文案() -> dict:
+def 获取舔狗日记() -> dict:
     """
-    从网页公共开放的API获取骚话文案。
+    从网页公共开放的API获取最新一条“舔狗日记”。
     """
     try:
-        # 发送请求获取骚话文案
-        response = requests.get("https://jkapi.com/api/saohua")
-        response.raise_for_status()  # 确保请求成功
-        骚话文案 = response.text.strip()  # 获取返回的骚话文案
+        response = requests.get("https://api.52vmy.cn/api/wl/yan/tiangou")
+        response.raise_for_status()
+        data = response.json()
+        # API 返回的日记内容在 content 字段
+        diary = data.get("content", "").strip()
 
-        logger.info(f"\n\n获取到的骚话文案: {骚话文案}\n")
-        return {"是否成功": True, "结果": 骚话文案}
+        logger.info(f"\n\n获取到的舔狗日记: {diary}\n")
+        return {"是否成功": True, "结果": diary}
     except Exception as e:
-        logger.error(f"获取骚话文案失败: {str(e)}")
+        logger.error(f"获取舔狗日记失败: {str(e)}")
         return {"是否成功": False, "错误": str(e)}
 
 # -------------------------------------------------------------------------------------------------
 
+# 定义工具函数：获取星座运势
 
-# 定义工具函数：获取土味情话
+
 @mcp.tool()
-def 获取土味情话() -> dict:
+def 查询星座运势(星座名: str = "天秤座") -> dict:
     """
-    从网页获取土味情话。
+    获取指定星座的今日运势
+
+    参数:
+        星座名: 星座名称，例如“天秤座，天蝎座，巨蟹座”。若留空则默认为“天秤座”。
     """
     try:
-        # 发送请求获取土味情话
-        response = requests.get("https://jkapi.com/api/tuweiqinghua")
+        url = f"https://api.52vmy.cn/api/wl/s/xingzuo?msg={星座名}"
+        # 发送请求获取
+        response = requests.get(url)
         response.raise_for_status()  # 确保请求成功
-        土味情话 = response.text.strip()  # 获取返回的土味情话
+        运势内容 = response.text.strip()  # 获取返回的内容
 
-        logger.info(f"\n\n获取到的土味情话: {土味情话}\n")
-        return {"是否成功": True, "结果": 土味情话}
+        logger.info(f"\n\n获取到的 【{星座名}】 运势内容: \n\n{运势内容}\n")
+        return {"是否成功": True, "结果": 运势内容}
     except Exception as e:
-        logger.error(f"获取土味情话失败: {str(e)}")
+        logger.error(f"获取今日电影票房榜失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+
+# 定义工具函数：运势抽签
+@mcp.tool()
+def 运势抽签() -> dict:
+    """
+    调用公共 API 抽取一支今日运势签。
+    """
+    try:
+        response = requests.get("https://api.52vmy.cn/api/wl/s/draw", timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("code") != 200:
+            logger.warning(f"运势抽签接口返回异常: {data}")
+            return {"是否成功": False, "错误": data.get("msg", "未知错误")}
+        sign_data = data.get("data", {})
+        sign_text = sign_data.get("text", "").strip()
+        logger.info(f"\n\n今日运势签: {sign_text}\n")
+        return {"是否成功": True, "结果": sign_text}
+    except Exception as e:
+        logger.error(f"运势抽签失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+
+# 定义工具函数：获取实时热榜
+@mcp.tool()
+def 查询三大平台热点(platform: str = "baidu", top: int = 10) -> dict:
+    """
+    获取百度 / 知乎 / 微博实时热榜
+    """
+    platform = platform.strip().lower()
+    if platform not in {"baidu", "zhihu", "weibo"}:
+        return {"是否成功": False, "错误": "platform 只能是 baidu / zhihu / weibo"}
+
+    url = f"https://api.52vmy.cn/api/wl/hot?type={platform}"
+
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if data.get("code") != 200:
+            logger.warning(f"查询 {platform} 热榜接口异常: {data}")
+            return {"是否成功": False, "错误": data.get("msg", "未知错误")}
+
+        items = data.get("data", [])[:top]
+        lines = []
+        for idx, item in enumerate(items, 1):
+            title = item.get("title", "")
+            # 统一去掉 “万”“W”“个内容” 等后缀
+            hot_raw = str(item.get("hot", "0"))
+            hot_num = ''.join(filter(str.isdigit, hot_raw)) or "0"
+            lines.append(f"{idx:>2}. {title}  ({hot_num})")
+
+        formatted = (
+            f"【{data.get('title', platform.upper())} 实时热榜 TOP{len(items)}】\n"
+            + "\n".join(lines)
+        )
+
+        logger.info(f"\n\n{formatted}\n")
+        return {"是否成功": True, "结果": formatted}
+
+    except Exception as e:
+        logger.error(f"查询 {platform} 热榜失败: {e}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+ 
+
+# 定义工具函数：获取名人名言
+@mcp.tool()
+def 获取名人名言() -> dict:
+    """
+    从开放API随机获取一条名人名言，包含名言内容与作者信息。
+    """
+    try:
+        response = requests.get("https://api.52vmy.cn/api/wl/yan/ming", timeout=10)
+        response.raise_for_status()
+
+        data = response.json()
+        if data.get("code") != 200:
+            logger.warning(f"名人名言接口返回异常: {data}")
+            return {"是否成功": False, "错误": data.get("msg", "未知错误")}
+
+        quote = data.get("data", {}).get("msg", "").strip()
+        author = data.get("data", {}).get("source", "").strip()
+
+        result = f"{quote} ——{author}" if author else quote
+        logger.info(f"\n\n获取到的名人名言: {result}\n")
+        return {"是否成功": True, "结果": result}
+    except Exception as e:
+        logger.error(f"获取名人名言失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+ 
+
+# 定义工具函数：获取每日一句
+@mcp.tool()
+def 获取每日一句() -> dict:
+    """
+    获取今日的中英双语励志短句（每日一句）。
+    返回：
+        dict: {"是否成功": bool, "结果": str}
+              成功时返回格式化后的中英双语句子；
+              失败时返回错误信息。
+    """
+    try:
+        resp = requests.get("https://api.52vmy.cn/api/wl/yan/day", timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if data.get("code") != 200:
+            logger.warning(f"每日一句接口异常: {data}")
+            return {"是否成功": False, "错误": data.get("msg", "未知错误")}
+
+        info = data.get("data", {})
+        zh = info.get("zh", "").strip()
+        en = info.get("en", "").strip()
+
+        result = f"{zh}\n{en}"
+        logger.info(f"\n\n获取到每日一句：\n{result}\n")
+        return {"是否成功": True, "结果": result}
+
+    except Exception as e:
+        logger.error(f"获取每日一句失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+    
+# -------------------------------------------------------------------------------------------------
+ 
+# 定义工具函数：获取绕口令
+@mcp.tool()
+def 获取绕口令() -> dict:
+    """
+    随机获取一条中文绕口令。
+    返回:
+        dict: {
+            "是否成功": bool,
+            "结果": str   # 完整的绕口令文本
+        }
+    """
+    try:
+        resp = requests.get("https://api.52vmy.cn/api/wl/yan/rao", timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if data.get("code") != 200:
+            logger.warning(f"绕口令接口异常: {data}")
+            return {"是否成功": False, "错误": data.get("msg", "未知错误")}
+
+        tongue_twister = data.get("data", {}).get("msg", "").strip()
+        logger.info(f"\n\n获取到绕口令: {tongue_twister}\n")
+        return {"是否成功": True, "结果": tongue_twister}
+
+    except Exception as e:
+        logger.error(f"获取绕口令失败: {str(e)}")
         return {"是否成功": False, "错误": str(e)}
 
 
 # -------------------------------------------------------------------------------------------------
+ 
+
+@mcp.tool()
+def 查询油价() -> dict:
+    """
+    获取全国各省最新油价
+    """
+    url = "https://api.52vmy.cn/api/query/oil"
+
+    try:
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if data.get("code") != 200:
+            msg = data.get("msg", "未知错误")
+            logger.error(f"查询油价失败：{msg}")
+            return {"是否成功": False, "错误": msg}
+
+        oil_list = data.get("data", [])
+        if not oil_list:
+            logger.warning("油价接口返回数据为空")
+            return {"是否成功": False, "错误": "返回数据为空"}
+
+        formatted = ""
+        for item in oil_list:
+            city = item.get("city", "未知地区")
+            formatted += f"地区：{city}\n"
+            formatted += f"    0号柴油：{item.get('0', '无数据')} 元/升\n"
+            formatted += f"    92号汽油：{item.get('92', '无数据')} 元/升\n"
+            formatted += f"    95号汽油：{item.get('95', '无数据')} 元/升\n"
+            formatted += f"    98号汽油：{item.get('98', '无数据')} 元/升\n"
+            formatted += "-" * 50 + "\n"
+
+        logger.info(f"\n\n获取油价成功：\n{formatted}\n")
+        return {"是否成功": True, "result": formatted}
+
+    except requests.RequestException as e:
+        logger.error(f"请求油价接口时发生网络错误：{e}")
+        return {"是否成功": False, "错误": f"网络请求失败：{e}"}
+    except Exception as e:
+        logger.error(f"解析油价数据时发生错误：{e}")
+        return {"是否成功": False, "错误": f"解析数据失败：{e}"}
+
+# -------------------------------------------------------------------------------------------------
+ 
+
+# 定义工具函数：获取新年祝福语
+@mcp.tool()
+def 获取新年祝福语(category: str = "通用") -> dict:
+    """
+    随机获取一条 2025 蛇年祝福语，可按场景分类。
+
+    参数:
+        category (str): 可选分类关键词，默认“通用”。
+                        支持：通用、生活、事业、家庭、友情、健康、学习、财富、情感、
+                             领导、老师、同事、下属、朋友、家人、爱人、自己、孩子
+    返回:
+        dict: {
+            "是否成功": bool,
+            "结果": str   # 祝福语文本
+        }
+    """
+    url = "https://api.52vmy.cn/api/zhufu/2025"
+    params = {"msg": category.strip()}
+
+    try:
+        resp = requests.get(url, params=params, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if data.get("code") != 200:
+            logger.warning(f"祝福语接口异常: {data}")
+            return {"是否成功": False, "错误": data.get("msg", "未知错误")}
+
+        blessing = data.get("data", {}).get("text", "").strip()
+        if not blessing:
+            return {"是否成功": False, "错误": "未返回祝福语内容"}
+
+        logger.info(f"\n\n获取到【{category}】祝福语: {blessing}\n")
+        return {"是否成功": True, "结果": blessing}
+
+    except Exception as e:
+        logger.error(f"获取新年祝福语失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
 
 
+# -------------------------------------------------------------------------------------------------
+ 
 # 定义工具函数：获取今日电影票房 Top10
 @mcp.tool()
 def 获取今日电影票房() -> dict:
@@ -1060,6 +1239,76 @@ def 搜索百度百科(query: str) -> dict:
 # -------------------------------------------------------------------------------------------------
  
 
+# 定义工具函数：获取历史上的今天
+@mcp.tool()
+def 获取历史上的今天() -> dict:
+    """
+    从网页获取历史上的今天的信息。
+    """
+    try:
+        # 发送请求获取历史上的今天的信息
+        response = requests.get("https://api.52vmy.cn/api/wl/today")
+        response.raise_for_status()  # 确保请求成功
+        历史数据 = response.json()  # 获取返回的JSON数据
+
+        # 提取历史事件的年份和标题并格式化
+        历史事件 = []
+        for 事件 in 历史数据["data"]:
+            年份 = 事件["year"]
+            标题 = 事件["title"]
+            # 格式化输出，年份和标题在同一行，每个事件之间换行
+            历史事件.append(f"{年份} {标题}")
+
+        # 将历史事件列表转换为一个整齐的字符串
+        格式化历史事件 = "\n".join(历史事件)
+
+        logger.info(f"\n\n获取到的历史上的今天的信息: \n\n{格式化历史事件}\n")
+        return {"是否成功": True, "结果": 格式化历史事件}
+    except Exception as e:
+        logger.error(f"获取历史上的今天的信息失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+# -------------------------------------------------------------------------------------------------
+
+
+# 定义工具函数：获取万年历
+@mcp.tool()
+def 获取万年历() -> dict:
+    """
+    从网页获取当日的万年历信息。
+    """
+    try:
+        # 发送请求获取万年历信息
+        response = requests.get("https://api.52vmy.cn/api/wl/wnl")
+        response.raise_for_status()  # 确保请求成功
+        万年历数据 = response.json()  # 获取返回的JSON数据
+
+        # 提取并格式化所需字段
+        农历日期 = f"{万年历数据['lunarYear']}年{万年历数据['lMonth']}{万年历数据['lDate']}"
+        干支 = f"{万年历数据['gzYear']}年 {万年历数据['gzMonth']}月 {万年历数据['gzDate']}日"
+        生肖 = 万年历数据['animal']
+        宜 = 万年历数据['suit']
+        忌 = 万年历数据['avoid']
+
+        格式化万年历 = (
+            f"【公历】{万年历数据['year']}年{万年历数据['month']}月{万年历数据['day']}日\n"
+            f"【农历】{农历日期}\n"
+            f"【干支】{干支}\n"
+            f"【生肖】{生肖}\n"
+            f"【宜】{宜}\n"
+            f"【忌】{忌}"
+        )
+
+        logger.info(f"\n\n获取到的万年历信息: \n\n{格式化万年历}\n")
+        return {"是否成功": True, "结果": 格式化万年历}
+    except Exception as e:
+        logger.error(f"获取万年历信息失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+    
+# -------------------------------------------------------------------------------------------------
+ 
+
+
+
 @mcp.tool()        
 def 获取深证成指() -> dict:
     """
@@ -1159,75 +1408,6 @@ def 查询公司基本面(股票代码: str) -> dict:
 
 # -------------------------------------------------------------------------------------------------
 
-# 定义工具函数：获取历史上的今天
-@mcp.tool()
-def 获取历史上的今天() -> dict:
-    """
-    从网页获取历史上的今天的信息。
-    """
-    try:
-        # 发送请求获取历史上的今天的信息
-        response = requests.get("https://api.52vmy.cn/api/wl/today")
-        response.raise_for_status()  # 确保请求成功
-        历史数据 = response.json()  # 获取返回的JSON数据
-
-        # 提取历史事件的年份和标题并格式化
-        历史事件 = []
-        for 事件 in 历史数据["data"]:
-            年份 = 事件["year"]
-            标题 = 事件["title"]
-            # 格式化输出，年份和标题在同一行，每个事件之间换行
-            历史事件.append(f"{年份} {标题}")
-
-        # 将历史事件列表转换为一个整齐的字符串
-        格式化历史事件 = "\n".join(历史事件)
-
-        logger.info(f"\n\n获取到的历史上的今天的信息: \n\n{格式化历史事件}\n")
-        return {"是否成功": True, "结果": 格式化历史事件}
-    except Exception as e:
-        logger.error(f"获取历史上的今天的信息失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-# -------------------------------------------------------------------------------------------------
-
-
-# 定义工具函数：获取万年历
-@mcp.tool()
-def 获取万年历() -> dict:
-    """
-    从网页获取当日的万年历信息。
-    """
-    try:
-        # 发送请求获取万年历信息
-        response = requests.get("https://api.52vmy.cn/api/wl/wnl")
-        response.raise_for_status()  # 确保请求成功
-        万年历数据 = response.json()  # 获取返回的JSON数据
-
-        # 提取并格式化所需字段
-        农历日期 = f"{万年历数据['lunarYear']}年{万年历数据['lMonth']}{万年历数据['lDate']}"
-        干支 = f"{万年历数据['gzYear']}年 {万年历数据['gzMonth']}月 {万年历数据['gzDate']}日"
-        生肖 = 万年历数据['animal']
-        宜 = 万年历数据['suit']
-        忌 = 万年历数据['avoid']
-
-        格式化万年历 = (
-            f"【公历】{万年历数据['year']}年{万年历数据['month']}月{万年历数据['day']}日\n"
-            f"【农历】{农历日期}\n"
-            f"【干支】{干支}\n"
-            f"【生肖】{生肖}\n"
-            f"【宜】{宜}\n"
-            f"【忌】{忌}"
-        )
-
-        logger.info(f"\n\n获取到的万年历信息: \n\n{格式化万年历}\n")
-        return {"是否成功": True, "结果": 格式化万年历}
-    except Exception as e:
-        logger.error(f"获取万年历信息失败: {str(e)}")
-        return {"是否成功": False, "错误": str(e)}
-    
-# -------------------------------------------------------------------------------------------------
- 
-
-
 import json
 # 定义工具函数：12306查询车票
 @mcp.tool()
@@ -1288,6 +1468,65 @@ def 查询高铁票(出发站: str, 到达站: str, 出发日期: str) -> dict:
         logger.error(f"获取火车票信息失败: {str(e)}")
         return {"是否成功": False, "错误": str(e)}
 # -------------------------------------------------------------------------------------------------
+
+
+
+
+# 工具：更换桌面壁纸
+@mcp.tool()
+def 更换桌面壁纸(content: str) -> dict:
+    """
+    根据关键词从在线壁纸 API 获取图片并设置为 Windows 桌面静态壁纸。最低1080P，最高4k
+    参数:
+        content (str): 壁纸类型关键词，例如 "风景"、"动漫"、"美女"、"宝马"、"斑马" 等。
+                       留空，则返回随机类型壁纸。
+
+    """
+    api_root = "https://wp.upx8.com/api.php"
+    save_dir = r"C:\xiaozhi\MCP\MCP_Windows\组件\MCP工具服务组件\下载\壁纸图片"
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 统一主题命名：用户输入为空 → “随机”
+    theme = content.strip() if content.strip() else "随机"
+
+    try:
+        # 1. 取 302 真实直链
+        params = {"content": content.strip()} if content.strip() else {}
+        resp = requests.get(api_root, params=params, timeout=15, allow_redirects=False)
+        resp.raise_for_status()
+        image_url = resp.headers.get("Location") or resp.headers.get("location")
+        if not image_url:
+            raise ValueError("未能获取壁纸，可尝试更换关键词！")
+
+        # 2. 下载
+        img_resp = requests.get(image_url, timeout=15, stream=True)
+        img_resp.raise_for_status()
+
+        # 3. 生成文件名：20250817-204728=风景.jpg
+        file_name = f"{time.strftime('%Y%m%d-%H%M%S')}={theme}.jpg"
+        local_path = os.path.join(save_dir, file_name)
+
+        with open(local_path, "wb") as f:
+            for chunk in img_resp.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        # 4. 设为桌面壁纸
+        ctypes.windll.user32.SystemParametersInfoW(0x0014, 0, local_path, 0x01 | 0x02)
+
+        logger.info(f"桌面壁纸已更换，类型：{theme}")
+        return {
+            "是否成功": True,
+            "壁纸类型": theme
+        }
+
+    except Exception as e:
+        logger.error(f"更换桌面壁纸失败: {e}")
+        return {"是否成功": False, "错误，可尝试更换关键词！": str(e)}
+    
+    
+# -------------------------------------------------------------------------------------------------
+
 
 
 # 定义工具函数：作者环境下可用的专属工具
@@ -1364,6 +1603,8 @@ if os.path.exists(是作者工作环境判断文件路径):
 
 
 # -------------------------------------------------------------------------------------------------
+
+
 
 #以下为洛雪音乐软件控制工具
 
@@ -1733,46 +1974,50 @@ def 推送巴法消息(要推送的主题: str, 要推送的消息: str) -> dict
     "14.显示桌面",
     "15.查看系统资源使用情况",
     "16.查看电脑配置信息 & 获取桌面完整路径",
-    "17.设置Windows系统深浅色主题"
+    "17.设置Windows系统深浅色主题",
+    "18.更换桌面壁纸"
+
 ]
 
 # AI 平台相关的 API 能力列表（第二部分）
 API功能 = [
     "\n支持的 开放_API-能力：\n",
     "1.获取心灵毒鸡汤",
-    "2.获取早安问候语",
-    "3.获取晚安问候语",
-    "4.获取随机一言",
-    "5.获取骚话文案",
-    "6.获取抖音热点",
-    "7.获取哔哩哔哩热搜",
-    "8.获取微博热搜",
-    "9.少数派热点",
-    "10.获取土味情话",
-    "11.获取深证成指",
-    "12.查询个股行情",
-    "13.查询公司基本面",
-    "14.获取历史上的今天",
-    "15.查询高铁票",
-    "16.获取回声洞",
-    "17.获取脑筋急转弯",
-    "18.每日早报",
-    "19.今天吃什么",
-    "20.搜索百度百科",
-    "21.获取今日电影票房",
-    "22.获取万年历",
-    "23.推送巴法消息"
+    "2.获取抖音热点",
+    "3.获取随机一言",
+    "4.获取舔狗日记",
+    "5.获取星座运势",
+    "6.运势抽签",
+    "7.获取百度知乎微博实时热榜",
+    "8.获取名人名言",
+    "9.获取每日一句",
+    "10.获取绕口令",
+    "11.查询油价",
+    "12.获取新年祝福语",
+    "13.获取今日电影票房",
+    "14.获取脑筋急转弯",
+    "15.每日早报",
+    "16.今天吃什么",
+    "17.搜索百度百科",
+    "18.获取历史上的今天",
+    "19.获取万年历",
+    "20.获取深证成指",
+    "21.查询个股行情",
+    "22.查询公司基本面",
+    "23.查询高铁票",
+    "24.获取回声洞",
+    "25.推送巴法消息"
 ]
 
 # 动态插入工具功能到第一部分
 if 允许使用微信发消息工具:
-    控制电脑功能.append("18.向微信指定联系人发送内容")
+    控制电脑功能.append("19.向微信指定联系人发送内容")
 
 
 # 动态插入工具功能
 if 是作者工作环境:
 
-    API功能.append("24.获取房间环境温湿度！")
+    API功能.append("26.获取房间环境温湿度！")
 
     # 控制洛雪音乐工具列表（第3部分）
 
@@ -1806,7 +2051,7 @@ else:
 # 主程序入口
 if __name__ == "__main__":
     logger.info("\n\n\tMCP_Windows服务已启动！等待调用！\n\n当前支持的控制电脑工具：\n" + "\n".join(功能内容) + "\n\n快尝试小智的能力吧！\n")
-    logger.info("\n\n\t\b版本：v45.36.51 (2025-08-04 更新)\n\t\tBy[粽子同学]\n\n")
+    logger.info("\n\n\t\b版本：v48.56.31 (2025-08-18 更新)\n\t\tBy[粽子同学]\n\n")
     mcp.run(transport="stdio")
 # -------------------------------------------------------------------------------------------------
 

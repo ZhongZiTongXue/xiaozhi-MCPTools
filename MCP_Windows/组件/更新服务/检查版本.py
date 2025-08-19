@@ -46,8 +46,7 @@ new_version_file = r"C:\xiaozhi\MCP\MCP_Windows\组件\更新服务\状态\有�
 up_to_date_file = r"C:\xiaozhi\MCP\MCP_Windows\组件\更新服务\状态\已是最新.exe"
 
 # 当前版本
-current_version = "45.36.21"
-
+current_version = "48.56.23"
 
 # 删除已存在的文件
 def delete_files():

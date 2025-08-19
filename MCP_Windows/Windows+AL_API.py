@@ -581,6 +581,63 @@ def 获取桌面完整路径() -> dict:
 # -------------------------------------------------------------------------------------------------
 
 
+# 工具：更换桌面壁纸
+@mcp.tool()
+def 更换桌面壁纸(content: str) -> dict:
+    """
+    根据关键词从在线壁纸 API 获取图片并设置为 Windows 桌面静态壁纸。最低1080P，最高4k
+    参数:
+        content (str): 壁纸类型关键词，例如 "风景"、"动漫"、"美女"、"宝马"、"斑马" 等。
+                       留空，则返回随机类型壁纸。
+
+    """
+    api_root = "https://wp.upx8.com/api.php"
+    save_dir = r"C:\xiaozhi\MCP\MCP_Windows\组件\MCP工具服务组件\下载\壁纸图片"
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 统一主题命名：用户输入为空 → “随机”
+    theme = content.strip() if content.strip() else "随机"
+
+    try:
+        # 1. 取 302 真实直链
+        params = {"content": content.strip()} if content.strip() else {}
+        resp = requests.get(api_root, params=params, timeout=15, allow_redirects=False)
+        resp.raise_for_status()
+        image_url = resp.headers.get("Location") or resp.headers.get("location")
+        if not image_url:
+            raise ValueError("未能获取壁纸，可尝试更换关键词！")
+
+        # 2. 下载
+        img_resp = requests.get(image_url, timeout=15, stream=True)
+        img_resp.raise_for_status()
+
+        # 3. 生成文件名：20250817-204728=风景.jpg
+        file_name = f"{time.strftime('%Y%m%d-%H%M%S')}={theme}.jpg"
+        local_path = os.path.join(save_dir, file_name)
+
+        with open(local_path, "wb") as f:
+            for chunk in img_resp.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        # 4. 设为桌面壁纸
+        ctypes.windll.user32.SystemParametersInfoW(0x0014, 0, local_path, 0x01 | 0x02)
+
+        logger.info(f"桌面壁纸已更换，类型：{theme}")
+        return {
+            "是否成功": True,
+            "壁纸类型": theme
+        }
+
+    except Exception as e:
+        logger.error(f"更换桌面壁纸失败: {e}")
+        return {"是否成功": False, "错误，可尝试更换关键词！": str(e)}
+    
+    
+# -------------------------------------------------------------------------------------------------
+
+
+
 # 检查是否允许使用微信工具  使用即同意协议
 允许使用微信发消息工具 = False
 允许使用微信发消息工具判断文件路径 = r"C:\xiaozhi\MCP\MCP_Windows\数据\允许使用微信发消息工具.DLL"
@@ -1366,7 +1423,8 @@ if os.path.exists(是作者工作环境判断文件路径):
     "14.显示桌面",
     "15.查看系统资源使用情况",
     "16.查看电脑配置信息 & 获取桌面完整路径",
-    "17.设置Windows系统深浅色主题"
+    "17.设置Windows系统深浅色主题",
+    "18.更换桌面壁纸"
 ]
 
 # AI 平台相关的 API 能力列表（第二部分）
@@ -1387,7 +1445,7 @@ API功能 = [
 
 # 动态插入工具功能到第一部分
 if 允许使用微信发消息工具:
-    控制电脑功能.append("18.向微信指定联系人发送内容")
+    控制电脑功能.append("19.向微信指定联系人发送内容")
 
 # 动态插入工具功能
 if 使用控制洛雪音乐工具:
@@ -1422,7 +1480,7 @@ else:
 # 主程序入口
 if __name__ == "__main__":
     logger.info("\n\n\tMCP_Windows服务已启动！等待调用！\n\n当前支持：\n" + "\n".join(功能内容) + "\n\n快尝试让小智的能力吧！\n")
-    logger.info("\n\n\t\b版本：v34.21.26 (2025-08-01 更新)\n\t\tBy[粽子同学]\n\n")
+    logger.info("\n\n\t\b版本：v35.21.26 (2025-08-18 更新)\n\t\tBy[粽子同学]\n\n")
     mcp.run(transport="stdio")
 # -------------------------------------------------------------------------------------------------
 

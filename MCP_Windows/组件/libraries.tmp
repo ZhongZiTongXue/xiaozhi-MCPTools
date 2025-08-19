@@ -1,0 +1,11 @@
+websockets
+python-dotenv
+fastmcp
+pyautogui
+pyperclip
+mcp
+paho-mqtt
+requests
+beautifulsoup4
+pycaw
+psutil

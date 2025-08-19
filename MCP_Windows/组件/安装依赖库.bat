@@ -1,5 +1,5 @@
 @echo off
-title Python库安装程序（使用阿里云镜像）
+title Python库安装程序（使用中科大镜像）
 
 :: 设置错误处理
 setlocal enabledelayedexpansion
@@ -14,8 +14,8 @@ set "CYAN=03"
 set "PURPLE=05"
 set "WHITE=07"
 
-:: 定义阿里云镜像源
-set "MIRROR=-i https://mirrors.aliyun.com/pypi/simple/"
+:: 定义中科大镜像源
+set "MIRROR=-i https://pypi.mirrors.ustc.edu.cn/simple --trusted-host pypi.mirrors.ustc.edu.cn"
 
 :: 创建临时文件存储库列表（竖列格式）
 echo websockets> libraries.tmp
@@ -30,7 +30,6 @@ echo beautifulsoup4>> libraries.tmp
 echo pycaw>> libraries.tmp
 echo psutil>> libraries.tmp
 
-
 :: 开始安装
 color %RED%
 echo.
@@ -42,7 +41,7 @@ timeout /T 6 /NOBREAK
 for /f "usebackq delims=" %%i in ("libraries.tmp") do (
     color %WHITE%
     echo.
-    echo.——————————  正在从阿里云镜像安装库：%%i  ————————————
+    echo.————————————  正在从中科大镜像安装库：%%i  ————————————
     echo.
     
     :: 随机选择颜色
@@ -56,7 +55,7 @@ for /f "usebackq delims=" %%i in ("libraries.tmp") do (
     
     color !CURRENT_COLOR!
     
-    :: 执行安装命令（使用阿里云镜像）
+    :: 执行安装命令（使用中科大镜像）
     pip install %%i %MIRROR%
     if !ERRORLEVEL! NEQ 0 (
         echo.安装库 %%i 时出错！
