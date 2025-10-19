@@ -613,7 +613,7 @@ if 允许使用微信发消息工具:
         """
         try:
 
-            logger.info(f"\n\n开始执行向{微信联系人}\n发送了内容！\n")
+            logger.info(f"\n\n开始执行向：{微信联系人}\n发送内容！\n")
             #使用快捷键 Ctrl+Alt+W 呼出微信界面
             pyautogui.hotkey('Ctrl', 'alt', 'w')
             # 如果是预设程序名称，则获取对应的路径
@@ -679,6 +679,177 @@ if 允许使用微信发消息工具:
 
 
 
+
+    @mcp.tool()
+    def 向微信联系人发送指定文件(文件路径: str, 微信联系人: str) -> dict:
+
+        """
+        向微信指定联系人发送指定文件
+        参数：
+            文件路径：（要发送的文件完整路径）如：C:\Windows\explorer.exe
+            微信联系人：（文件发送的目标联系人）
+        """
+        try:
+
+            logger.info(f"\n\n开始执行向：{微信联系人}\n发送文件！\n")
+            #使用快捷键 Ctrl+Alt+W 呼出微信界面
+            pyautogui.hotkey('Ctrl', 'alt', 'w')
+            # 如果是预设程序名称，则获取对应的路径
+            program_path = preset_programs.get("微信", "微信")
+            if program_path.endswith('.lnk'):
+                # 如果是.lnk文件，使用os.startfile打开
+            # 运行微信以显示窗口
+                os.startfile(program_path)
+                # 等待
+                time.sleep(0.1)
+                os.startfile(program_path)
+                # 等待
+                time.sleep(0.1)
+            else:
+            # 运行微信以显示窗口 运行多次保证显示
+                subprocess.Popen(program_path)
+                # 等待
+                time.sleep(0.1)           
+                subprocess.Popen(program_path)
+                # 等待
+                time.sleep(0.1)
+            # 等待
+            time.sleep(0.2)
+            #模拟 Ctrl+F 跳转到搜索
+            pyautogui.hotkey('Ctrl', 'f')
+            # 等待
+            time.sleep(0.1)
+            # 复制要搜索的联系人到剪贴板
+            pyperclip.copy(微信联系人)
+            # 等待0.1秒
+            time.sleep(0.1)
+            # 模拟 Ctrl+V 操作 粘贴要搜索的联系人
+            pyautogui.hotkey('Ctrl', 'v')
+            # 等待
+            time.sleep(1.6)
+            # 模拟 按下 Enter 操作 选中进入联系人对话框
+            pyautogui.hotkey('Enter')
+            #准备发送文件
+
+            abspath = os.path.abspath(文件路径)
+            # 启动 explorer，但不捕获输出
+            subprocess.Popen(['explorer', '/select,', abspath], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            folder_name = os.path.basename(os.path.dirname(abspath))
+            ps = f'''
+            $wshell = New-Object -ComObject WScript.Shell
+            while (-not (Get-Process explorer | Where-Object {{$_.MainWindowTitle -like "*{folder_name}*"}})) {{Start-Sleep -Milliseconds 200}}
+            [void]$wshell.AppActivate((Get-Process explorer | Where-Object {{$_.MainWindowTitle -like "*{folder_name}*"}}).MainWindowTitle)
+            '''
+            subprocess.Popen(['powershell', '-NoProfile', '-Command', ps], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+            time.sleep(3.6)
+
+            pyautogui.hotkey('ctrl', 'c')
+            # 等待
+            time.sleep(0.5)
+            pyautogui.hotkey('alt', 'f4')
+
+            # 等待
+            time.sleep(1.5)
+
+            # 模拟 Ctrl+V 操作 粘贴要搜索的联系人
+            pyautogui.hotkey('Ctrl', 'v')
+            # 等待
+            time.sleep(1)
+            # 模拟 按下 Enter 操作   发送内容
+            pyautogui.hotkey('Enter')
+
+
+            logger.info(f"\n\n已尝试向：{微信联系人}\n发送了文件：{文件路径} ！\n")
+            return {"是否成功": True, "结果": f"已尝试向联系人：{微信联系人}\n发送了文件：{文件路径}"}
+        except Exception as e:
+            logger.error(f"\n\n错误！运行失败！: {str(e)}  可能未添加微信路径预设！\n")
+            return {"是否成功": False, "错误！运行失败！ 可能未添加微信路径预设！": str(e)}
+
+
+# -------------------------------------------------------------------------------------------------
+
+
+
+    @mcp.tool()
+    def 向微信指定联系人发送复制的内容(微信联系人: str) -> dict:
+
+        """
+        向微信指定联系人发送刚刚复制的内容。比如说刚刚的截图
+        以打开微信的方式显示微信窗口，搜索联系人显示联系人对话框，输入内容后直接回车发送
+        因为是完全自动化指令，没有任何空隙，内容发错可能会有影响
+        一定要向用户确认要发送的联系人和内容！
+        参数：
+        微信联系人: 要搜索的微信联系人  比如 "张三"
+        模拟操作，所以发送速度较慢请耐心等待返回
+        """
+        try:
+
+            logger.info(f"\n\n开始执行向：{微信联系人}\n发送复制的内容！\n")
+            #使用快捷键 Ctrl+Alt+W 呼出微信界面
+            pyautogui.hotkey('Ctrl', 'alt', 'w')
+            # 如果是预设程序名称，则获取对应的路径
+            program_path = preset_programs.get("微信", "微信")
+            if program_path.endswith('.lnk'):
+                # 如果是.lnk文件，使用os.startfile打开
+            # 运行微信以显示窗口
+                os.startfile(program_path)
+                # 等待
+                time.sleep(0.1)
+                os.startfile(program_path)
+                # 等待
+                time.sleep(0.1)
+            else:
+            # 运行微信以显示窗口 运行多次保证显示
+                subprocess.Popen(program_path)
+                # 等待
+                time.sleep(0.1)           
+                subprocess.Popen(program_path)
+                # 等待
+                time.sleep(0.1)
+            # 等待
+            time.sleep(0.2)
+            #模拟 Ctrl+F 跳转到搜索
+            pyautogui.hotkey('Ctrl', 'f')
+            # 等待
+            time.sleep(0.1)
+            # 复制要搜索的联系人到剪贴板
+            pyperclip.copy(微信联系人)
+            # 等待0.1秒
+            time.sleep(0.1)
+            # 模拟 Ctrl+V 操作 粘贴要搜索的联系人
+            pyautogui.hotkey('Ctrl', 'v')
+            # 等待
+            time.sleep(1)
+            # 模拟 按下 Enter 操作 选中进入联系人对话框
+            pyautogui.hotkey('Enter')
+            #准备发送消息
+            # 等待
+            time.sleep(0.6)
+            #使用快捷键 Ctrl+Alt+W 隐藏再呼出微信界面，确保光标在输入框
+            pyautogui.hotkey('Ctrl', 'alt', 'w')
+            time.sleep(0.5)
+            pyautogui.hotkey('Ctrl', 'alt', 'w')
+            # 等待
+            time.sleep(0.5)
+            # 模拟 Ctrl+V 操作 粘贴要搜索的联系人
+            pyautogui.hotkey('Ctrl', 'v')
+            # 等待
+            time.sleep(0.2)
+            # 模拟 按下 Enter 操作   发送内容
+            pyautogui.hotkey('Enter')
+
+            logger.info(f"\n\n已尝试向联系人：{微信联系人}\n发送了复制的内容！\n")
+            return {"是否成功": True, "结果": f"已尝试向联系人：{微信联系人}\n发送了复制的内容！"}
+        except Exception as e:
+            logger.error(f"\n\n错误！运行失败！: {str(e)}  可能未添加微信路径预设！\n")
+            return {"是否成功": False, "错误！运行失败！ 可能未添加微信路径预设！": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+
+
+
+
 @mcp.tool()
 def 设置主人电脑系统深浅色主题(params: dict) -> dict:
     """
@@ -702,6 +873,63 @@ def 设置主人电脑系统深浅色主题(params: dict) -> dict:
     except Exception as e:
         logger.error(f"切换主题失败: {str(e)}")
         return {"是否成功": False, "错误": str(e)}
+
+
+# -------------------------------------------------------------------------------------------------
+
+
+
+# 工具：更换桌面壁纸
+@mcp.tool()
+def 更换桌面壁纸(content: str) -> dict:
+    """
+    根据关键词从在线壁纸 API 获取图片并设置为 Windows 桌面静态壁纸。最低1080P，最高4k
+    参数:
+        content (str): 壁纸类型关键词，例如 "风景"、"动漫"、"美女"、"宝马"、"斑马" 等。
+                       留空，则返回随机类型壁纸。
+
+    """
+    api_root = "https://wp.upx8.com/api.php"
+    save_dir = r"C:\xiaozhi\MCP\MCP_Windows\组件\MCP工具服务组件\下载\壁纸图片"
+    os.makedirs(save_dir, exist_ok=True)
+
+    # 统一主题命名：用户输入为空 → “随机”
+    theme = content.strip() if content.strip() else "随机"
+
+    try:
+        # 1. 取 302 真实直链
+        params = {"content": content.strip()} if content.strip() else {}
+        resp = requests.get(api_root, params=params, timeout=15, allow_redirects=False)
+        resp.raise_for_status()
+        image_url = resp.headers.get("Location") or resp.headers.get("location")
+        if not image_url:
+            raise ValueError("未能获取壁纸，可尝试更换关键词！")
+
+        # 2. 下载
+        img_resp = requests.get(image_url, timeout=15, stream=True)
+        img_resp.raise_for_status()
+
+        # 3. 生成文件名：20250817-204728=风景.jpg
+        file_name = f"{time.strftime('%Y%m%d-%H%M%S')}={theme}.jpg"
+        local_path = os.path.join(save_dir, file_name)
+
+        with open(local_path, "wb") as f:
+            for chunk in img_resp.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+
+        # 4. 设为桌面壁纸
+        ctypes.windll.user32.SystemParametersInfoW(0x0014, 0, local_path, 0x01 | 0x02)
+
+        logger.info(f"桌面壁纸已更换，类型：{theme}")
+        return {
+            "是否成功": True,
+            "壁纸类型": theme
+        }
+
+    except Exception as e:
+        logger.error(f"更换桌面壁纸失败: {e}")
+        return {"是否成功": False, "错误，可尝试更换关键词！": str(e)}
 
 
 # -------------------------------------------------------------------------------------------------
@@ -1470,63 +1698,219 @@ def 查询高铁票(出发站: str, 到达站: str, 出发日期: str) -> dict:
 # -------------------------------------------------------------------------------------------------
 
 
-
-
-# 工具：更换桌面壁纸
+# 定义工具函数：查询实时公交
 @mcp.tool()
-def 更换桌面壁纸(content: str) -> dict:
+def 查询实时公交(city: str, site: str, backward: int = 0) -> dict:
     """
-    根据关键词从在线壁纸 API 获取图片并设置为 Windows 桌面静态壁纸。最低1080P，最高4k
-    参数:
-        content (str): 壁纸类型关键词，例如 "风景"、"动漫"、"美女"、"宝马"、"斑马" 等。
-                       留空，则返回随机类型壁纸。
-
-    """
-    api_root = "https://wp.upx8.com/api.php"
-    save_dir = r"C:\xiaozhi\MCP\MCP_Windows\组件\MCP工具服务组件\下载\壁纸图片"
-    os.makedirs(save_dir, exist_ok=True)
-
-    # 统一主题命名：用户输入为空 → “随机”
-    theme = content.strip() if content.strip() else "随机"
-
-    try:
-        # 1. 取 302 真实直链
-        params = {"content": content.strip()} if content.strip() else {}
-        resp = requests.get(api_root, params=params, timeout=15, allow_redirects=False)
-        resp.raise_for_status()
-        image_url = resp.headers.get("Location") or resp.headers.get("location")
-        if not image_url:
-            raise ValueError("未能获取壁纸，可尝试更换关键词！")
-
-        # 2. 下载
-        img_resp = requests.get(image_url, timeout=15, stream=True)
-        img_resp.raise_for_status()
-
-        # 3. 生成文件名：20250817-204728=风景.jpg
-        file_name = f"{time.strftime('%Y%m%d-%H%M%S')}={theme}.jpg"
-        local_path = os.path.join(save_dir, file_name)
-
-        with open(local_path, "wb") as f:
-            for chunk in img_resp.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
-
-        # 4. 设为桌面壁纸
-        ctypes.windll.user32.SystemParametersInfoW(0x0014, 0, local_path, 0x01 | 0x02)
-
-        logger.info(f"桌面壁纸已更换，类型：{theme}")
-        return {
-            "是否成功": True,
-            "壁纸类型": theme
+    查询城市实时公交到站信息（支持正向/对向）
+    参数：
+        city      : 城市名称，如 合肥，北京，深圳
+        site      : 站点名称，如 花泰路口，合肥南站
+        backward  : 0 正向（默认），1 对向
+    返回：
+        {
+          "是否成功": True/False,
+          "结果"   : ["...", "..."],
+          "错误"   : "..."          # 失败时存在
         }
+    """
+    try:
+        url = "https://free.xwteam.cn/api/traffic/bus"
+        params = {"city": city, "site": site, "backward": backward}
+        logger.info(f"[实时公交] 请求参数: {params}")
+
+        resp = requests.get(url, params=params, timeout=8)
+        resp.raise_for_status()
+
+        js = resp.json()
+        if js.get("code") != 200:
+            raise ValueError(f"接口业务错误: {js.get('msg')}")
+
+        data = js.get("data")
+
+        # 情况1：data 是字符串 → 站点无数据
+        if isinstance(data, str):
+            return {"是否成功": True, "结果": [data]}
+
+        # 情况2：data 是对象 → 取第一条 key 对应的数组
+        if not isinstance(data, dict) or not data:
+            raise ValueError("返回格式异常，data 既非字符串也非有效对象")
+
+        buses = list(data.values())[0]   # 如 {"合肥-花泰路口":[...]}
+        if not isinstance(buses, list):
+            raise ValueError("data 内层非数组")
+
+        # 过滤异常时间 & 拼接
+        lines = []
+        for b in buses:
+            arrival = b.get("expected_arrival", "")
+            # 过滤 1970 等脏数据
+            if "1970" in arrival:
+                continue
+            lines.append(
+                f"{b.get('line', '未知线路'):<8} "
+                f"车牌：{b.get('licence_plate', '未知'):<8} "
+                f"开往：{b.get('destination', '未知'):<12} "
+                f"剩余：{b.get('remaining_stations', '未知'):<4} "
+                f"预计：{b.get('estimated_time', '未知'):<6} "
+                f"票价：{b.get('price', '未知')}"
+            )
+
+        if not lines:
+            lines = ["暂无有效到站信息。"]
+
+        logger.info("\n[实时公交] 返回结果:\n" + "\n".join(lines))
+        return {"是否成功": True, "结果": lines}
 
     except Exception as e:
-        logger.error(f"更换桌面壁纸失败: {e}")
-        return {"是否成功": False, "错误，可尝试更换关键词！": str(e)}
+        logger.error(f"[实时公交] 失败: {str(e)}")
+        return {"是否成功": False, "错误": str(e)}
+
     
     
 # -------------------------------------------------------------------------------------------------
 
+
+
+
+#以下为PPT控制工具
+
+
+# -------------------------------------------------------------------------------------------------
+
+# PPT_上一页
+@mcp.tool()
+def PPT_上一页或上一步() -> dict:
+    """
+    模拟按下 左键 上一页或上一步 操作
+    """
+    try:
+
+        # 模拟 左键 操作
+        pyautogui.hotkey('left')
+
+        logger.info(f"\n\n已尝试按下 向左键 控制上一页或上一步\n")
+        return {"是否成功": True, "结果": f"已尝试按下 向左键 控制上一页或上一步"}
+    except Exception as e:
+        logger.error(f"\n\n错误！失败！: {str(e)}\n")
+        return {"是否成功": False, "错误！失败！": str(e)}
+
+# -------------------------------------------------------------------------------------------------
+
+
+# PPT_下一页
+@mcp.tool()
+def PPT_下一页或下一步() -> dict:
+    """
+    模拟按下 右键 下一页或下一步 操作
+    """
+    try:
+        # 模拟 右键 操作
+        pyautogui.hotkey('right')
+        logger.info(f"\n\n已尝试按下 向右键 控制下一页或下一步\n")
+        return {"是否成功": True, "结果": f"已尝试按下 向右键 控制下一页或下一步"}
+    except Exception as e:
+            logger.error(f"\n\n错误！失败！: {str(e)}\n")
+            return {"是否成功": False, "错误！失败！": str(e)}
+
+
+# -------------------------------------------------------------------------------------------------
+
+
+# PPT_结束放映
+@mcp.tool()
+def PPT_结束放映() -> dict:
+    """
+    模拟按下 Esc 键 结束放映
+    """
+    try:
+        # 模拟 Esc 操作
+        pyautogui.press('esc')
+        logger.info(f"\n\n已尝试按下 Esc 键 结束放映\n")
+        return {"是否成功": True, "结果": f"已尝试按下 Esc 键 结束放映"}
+    except Exception as e:
+            logger.error(f"\n\n错误！失败！: {str(e)}\n")
+            return {"是否成功": False, "错误！失败！": str(e)}
+
+
+# -------------------------------------------------------------------------------------------------
+
+# PPT_从当页开始放映
+@mcp.tool()
+def PPT_从当页开始放映() -> dict:
+    """
+    模拟按下 Shift + F5 键 从当页开始放映
+    """
+    try:
+        # 模拟 Shift + F5 操作
+        pyautogui.hotkey('shift', 'f5')
+        logger.info(f"\n\n已尝试按下 Shift + F5 键 从当页开始放映\n")
+        return {"是否成功": True, "结果": f"已尝试按下 Shift + F5 键 从当页开始放映"}
+    except Exception as e:
+            logger.error(f"\n\n错误！失败！: {str(e)}\n")
+            return {"是否成功": False, "错误！失败！": str(e)}
+
+
+# -------------------------------------------------------------------------------------------------
+
+
+# PPT_从头放映
+@mcp.tool()
+def PPT_从头放映() -> dict:
+    """
+    模拟按下 F5 键 从头放映
+    """
+    try:
+        # 模拟 F5 操作
+        pyautogui.press('f5')
+        logger.info(f"\n\n已尝试按下 F5 键 从头放映\n")
+        return {"是否成功": True, "结果": f"已尝试按下 F5 键 从头放映"}
+    except Exception as e:
+            logger.error(f"\n\n错误！失败！: {str(e)}\n")
+            return {"是否成功": False, "错误！失败！": str(e)}
+
+
+    
+# 在文档上查找内容
+@mcp.tool()
+def 在文档上查找内容(要查找的内容: str) -> dict:
+    """
+    模拟按下 Ctrl + F 键   粘贴内容  Enter搜索内容
+    """
+    try:
+        #等待
+        time.sleep(0.3)
+        # 模拟 ESC 操作
+        pyautogui.hotkey('esc')
+
+        # 模拟 Ctrl + F 操作
+        pyautogui.hotkey('ctrl', 'f')
+        #等待
+        time.sleep(0.1)
+        # 粘贴内容
+        pyperclip.copy(要查找的内容)
+        #等待
+        time.sleep(0.3)
+        # 模拟 Ctrl + A 操作
+        pyautogui.hotkey('ctrl', 'a')
+        time.sleep(0.1)
+        # 模拟 Ctrl + V 操作
+        pyautogui.hotkey('ctrl', 'v')
+        #等待
+        time.sleep(0.3)
+        # 模拟 Enter 操作
+        pyautogui.press('enter')
+        logger.info(f"\n\n已尝试按下 Ctrl + F 键   粘贴内容  Enter 搜索查找内容：{要查找的内容}\n")
+        return {"是否成功": True, "结果": f"已尝试按下 Ctrl + F 键   粘贴内容  Enter 搜索查找内容"}
+    except Exception as e:
+            logger.error(f"\n\n错误！失败！: {str(e)}\n")
+            return {"是否成功": False, "错误！失败！": str(e)}
+
+
+
+
+
+# -------------------------------------------------------------------------------------------------
 
 
 # 定义工具函数：作者环境下可用的专属工具
@@ -1537,7 +1921,7 @@ def 更换桌面壁纸(content: str) -> dict:
 if os.path.exists(是作者工作环境判断文件路径):
     是作者工作环境 = True
 
-    # 根据权限文件动态注册微信工具
+    # 根据权限文件动态注册工具
     if 是作者工作环境:
 
         @mcp.tool()
@@ -1638,7 +2022,7 @@ if os.path.exists(是作者工作环境判断文件路径):
 if os.path.exists(使用控制洛雪音乐工具判断文件路径):
     使用控制洛雪音乐工具 = True
 
-    # 根据权限文件动态注册微信工具
+    # 根据权限文件动态注册工具
     if 使用控制洛雪音乐工具:
 
 
@@ -1661,7 +2045,7 @@ if os.path.exists(使用控制洛雪音乐工具判断文件路径):
                 program_path = preset_programs.get("洛雪音乐", "洛雪音乐")
                 if program_path.endswith('.lnk'):
                     # 如果是.lnk文件，使用os.startfile打开
-                # 运行微信以显示窗口
+                # 运行以显示窗口
                     os.startfile(program_path)
                     # 等待
                     time.sleep(0.1)
@@ -1669,7 +2053,7 @@ if os.path.exists(使用控制洛雪音乐工具判断文件路径):
                     # 等待
                     time.sleep(0.1)
                 else:
-                # 运行微信以显示窗口 运行多次保证显示
+                # 运行以显示窗口 运行多次保证显示
                     subprocess.Popen(program_path)
                     # 等待
                     time.sleep(0.1)           
@@ -1789,7 +2173,7 @@ if os.path.exists(使用控制洛雪音乐工具判断文件路径):
                 program_path = preset_programs.get("洛雪音乐", "洛雪音乐")
                 if program_path.endswith('.lnk'):
                     # 如果是.lnk文件，使用os.startfile打开
-                # 运行微信以显示窗口
+                # 运行以显示窗口
                     os.startfile(program_path)
                     # 等待
                     time.sleep(0.1)
@@ -1797,7 +2181,7 @@ if os.path.exists(使用控制洛雪音乐工具判断文件路径):
                     # 等待
                     time.sleep(0.1)
                 else:
-                # 运行微信以显示窗口 运行多次保证显示
+                # 运行以显示窗口 运行多次保证显示
                     subprocess.Popen(program_path)
                     # 等待
                     time.sleep(0.1)           
@@ -1947,10 +2331,74 @@ def 推送巴法消息(要推送的主题: str, 要推送的消息: str) -> dict
             pass
 
 
+
+@mcp.tool()
+def 接收巴法消息(要接收的主题: str) -> dict:
+    """
+    接收巴法消息
+    参数：
+    要接收的主题: 接收监听此主题的消息
+    要监听的主题由用户提供！
+    """
+    HOST      = "bemfa.com"
+    PORT      = 9501
+    USERNAME  = "UserName"
+    PASSWORD  = "Passwd"
+    TIMEOUT   = 3
+
+    result = {"是否成功": False, "结果": ""}
+    received = False
+    timer = None
+
+    def on_connect(client, userdata, flags, reason_code, properties):
+        # 仅订阅，不再发送
+        client.subscribe(要接收的主题)
+
+    def on_message(client, userdata, msg):
+        nonlocal received, result
+        payload = msg.payload.decode("utf-8", errors="ignore")
+        received = True
+        result["是否成功"] = True
+        result["接收到的内容："] = payload
+        # 按你的格式记录日志
+        logger.info("\n\n主题：{要接收的主题}  接收到内容:\n\n" + payload)
+        client.disconnect()
+
+    def on_timeout():
+        nonlocal result
+        if not received:
+            result["是否成功"] = False
+            result["结果"] = "接收超时"
+            # 按你的格式记录日志
+            logger.error("\n\n接收内容失败:\n\n接收超时！")
+
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=用户巴法私钥)
+    client.username_pw_set(USERNAME, PASSWORD)
+    client.on_connect = on_connect
+    client.on_message = on_message
+
+    try:
+        client.connect(HOST, PORT, 60)
+        timer = threading.Timer(TIMEOUT, on_timeout)
+        timer.start()
+        client.loop_forever()
+    except Exception as e:
+        result["是否成功"] = False
+        result["结果"] = str(e)
+    finally:
+        if timer is not None:
+            timer.cancel()
+
+    return result
+
+
+
 # -------------------------------------------------------------------------------------------------
 
 
 #添加自己更多的API工具 或者MCP工具
+
+
 
 
 # -------------------------------------------------------------------------------------------------
@@ -1975,7 +2423,13 @@ def 推送巴法消息(要推送的主题: str, 要推送的消息: str) -> dict
     "15.查看系统资源使用情况",
     "16.查看电脑配置信息 & 获取桌面完整路径",
     "17.设置Windows系统深浅色主题",
-    "18.更换桌面壁纸"
+    "18.更换桌面壁纸",
+    "19.PPT_上一页或上一步",
+    "20.PPT_下一页或下一步",
+    "21.PPT_结束放映",
+    "22.PPT_从当页开始放映",
+    "23.PPT_从头放映",
+    "24.在文档上查找内容"
 
 ]
 
@@ -2006,22 +2460,23 @@ API功能 = [
     "22.查询公司基本面",
     "23.查询高铁票",
     "24.获取回声洞",
-    "25.推送巴法消息"
+    "25.推送巴法消息",
+    "26.接收巴法消息",
+    "27.查询实时公交"
 ]
 
 # 动态插入工具功能到第一部分
 if 允许使用微信发消息工具:
-    控制电脑功能.append("19.向微信指定联系人发送内容")
-
+    控制电脑功能.append("25.向微信指定联系人发送内容")
+    控制电脑功能.append("26.向微信联系人发送指定文件")
+    控制电脑功能.append("27.向微信指定联系人发送复制的内容")
 
 # 动态插入工具功能
 if 是作者工作环境:
 
-    API功能.append("26.获取房间环境温湿度！")
+    API功能.append("28.获取房间环境温湿度！")
 
-    # 控制洛雪音乐工具列表（第3部分）
-
-# 动态插入工具功能
+# 控制洛雪音乐工具列表（第3部分）
 if 使用控制洛雪音乐工具:
 
     洛雪音乐控制 = [
@@ -2051,7 +2506,7 @@ else:
 # 主程序入口
 if __name__ == "__main__":
     logger.info("\n\n\tMCP_Windows服务已启动！等待调用！\n\n当前支持的控制电脑工具：\n" + "\n".join(功能内容) + "\n\n快尝试小智的能力吧！\n")
-    logger.info("\n\n\t\b版本：v48.56.31 (2025-08-18 更新)\n\t\tBy[粽子同学]\n\n")
+    logger.info("\n\n\t\b版本：v58.93.62 (2025-10-18 更新)\n\t\tBy[粽子同学]\n\n")
     mcp.run(transport="stdio")
 # -------------------------------------------------------------------------------------------------
 

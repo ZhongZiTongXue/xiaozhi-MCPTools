@@ -15,7 +15,7 @@ client_id = "ac9a9f2b686bb4257867806c1dcfaf67"  # 使用实际的客户端ID
 血继限界权所有=r"C:\xiaozhi\MCP\MCP_Windows\血继限界版权所有.INI"
 XYZ电子实验室版权所有=r"C:\xiaozhi\MCP\MCP_Windows\XYZ电子实验室版权所有.INI"
 Teng版权所有=r"C:\xiaozhi\MCP\MCP_Windows\Teng版权所有.INI"
-
+momocore版权所有=r"C:\xiaozhi\MCP\MCP_Windows\momocore版权所有.INI"
 
 topic = "MCPToolsVersion004"  # 定义主题
 
@@ -34,6 +34,12 @@ if os.path.exists(XYZ电子实验室版权所有):
 if os.path.exists(Teng版权所有):
     
     topic = "MCPToolsVersion2"  # 定义主题
+
+if os.path.exists(momocore版权所有):
+    
+    topic = "MCPToolsVersion4"  # 定义主题
+
+
 
 
 message = "请求更新链接"
