@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/zhongzitongxue-xiaozhi-mcptools-badge.png)](https://mseep.ai/app/zhongzitongxue-xiaozhi-mcptools)
+
 # 一个图形化界面的 小智MCP连接器 
 
 ## 简介
